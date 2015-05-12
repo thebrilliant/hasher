@@ -14,6 +14,9 @@ public class StringHasher implements Hasher {
 	 * Given a string, breaks down the string into a number
 	 * based on the characters and their indexes.  Returns
 	 * the created number.
+	 * 
+	 * @param str, the string to be hashed
+	 * @return returns the number of the hashed string
 	 */
 	@Override
 	public int hash(String str) {
