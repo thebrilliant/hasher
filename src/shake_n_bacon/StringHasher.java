@@ -7,6 +7,8 @@ import providedCode.Hasher;
  * @UWNetID vivyanw, ffm2
  * @studentID 1327679, 1037290
  * @email vivyanw@uw.edu, ffm2@uw.edu
+ * 
+ * 			This class hashes strings by its own function
  */
 public class StringHasher implements Hasher {
 
