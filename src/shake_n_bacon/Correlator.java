@@ -1,7 +1,6 @@
 package shake_n_bacon;
 
 import java.io.*;
-import java.util.Scanner;
 
 import providedCode.*;
 
@@ -11,24 +10,10 @@ import providedCode.*;
  * @studentID 1327679, 1037290
  * @email vivyanw@uw.edu, ffm2@uw.edu
  * 
- *        TODO: REPLACE this comment with your own as appropriate.
- * 
- *        This should be done using a *SINGLE* iterator. This means only 1
- *        iterator being used in Correlator.java, *NOT* 1 iterator per
- *        DataCounter (You should call dataCounter.getIterator() just once in
- *        Correlator.java). Hint: Take advantage of DataCounter's method.
- * 
- *        Although you can share argument processing code with WordCount, it
- *        will be easier to copy & paste it from WordCount and modify it here -
- *        it is up to you. Since WordCount does not have states, making private
- *        method public to share with Correlator is OK. In general, you are not
- *        forbidden to make private method public, just make sure it does not
- *        violate style guidelines.
- * 
- *        Make sure WordCount and Correlator do not print anything other than
- *        what they are supposed to print (e.g. do not print timing info, input
- *        size). To avoid this, copy these files into package writeupExperiment
- *        and change it there as needed for your write-up experiments.
+ *        This class compares two files using either separate chaining hash
+ *        tables or open addressing hash tables.  It takes the information
+ *        passed through args to get the type of table to be used as well
+ *        as two file names.
  */
 public class Correlator {
 	
@@ -36,6 +21,9 @@ public class Correlator {
 	public static final double MAX = .01;
 
 	public static void main(String[] args) throws FileNotFoundException {
+		if (args.length != 3) {
+			usage();
+		}
 		String counterType = args[0];
 		String fileOne = args[1];
 		String fileTwo = args[2];
@@ -50,12 +38,12 @@ public class Correlator {
 			atlantisWords = new HashTable_OA(new StringComparator(), new StringHasher());	
 		}
 		
-		// TODO: Compute this variance
 		double variance = compare(hamletWords, atlantisWords, fileOne, fileTwo);
 		// IMPORTANT: Do not change printing format. Just print the double.
 		System.out.println(variance);
 	}
 	
+	//Compares the 
 	public static double compare(DataCounter words1, DataCounter words2, 
 								String file1, String file2) {
 		int wordCount1 = countWords(file1, words1);
@@ -96,5 +84,16 @@ public class Correlator {
 			System.exit(1);
 		}
 		return result;
+	}
+	
+	/*
+	 * Print error message and exit
+	 */
+	private static void usage() {
+		System.err
+				.println("Usage: [-s | -o] <filename of document to analyze>");
+		System.err.println("-s for hashtable with separate chaining");
+		System.err.println("-o for hashtable with open addressing");
+		System.exit(1);
 	}
 }

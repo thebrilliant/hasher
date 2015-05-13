@@ -1,7 +1,7 @@
 package shake_n_bacon;
 
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
+
 import providedCode.*;
 
 /**
@@ -10,29 +10,8 @@ import providedCode.*;
  * @studentID 1037290, 1327679
  * @email ffm2@uw.edu, vivyanw@uw.edu
  * 
- *        TODO: Replace this comment with your own as appropriate.
- * 
- *        1. You may implement HashTable with open addressing as discussed in
- *        class; You can choose one of those three: linear probing, quadratic
- *        probing or double hashing. The only restriction is that it should not
- *        restrict the size of the input domain (i.e., it must accept any key)
- *        or the number of inputs (i.e., it must grow as necessary).
- * 
- *        2. Your HashTable should rehash as appropriate (use load factor as
- *        shown in the class).
- * 
- *        3. To use your HashTable for WordCount, you will need to be able to
- *        hash strings. Implement your own hashing strategy using charAt and
- *        length. Do NOT use Java's hashCode method.
- * 
- *        4. HashTable should be able to grow at least up to 200,000. We are not
- *        going to test input size over 200,000 so you can stop resizing there
- *        (of course, you can make it grow even larger but it is not necessary).
- * 
- *        5. We suggest you to hard code the prime numbers. You can use this
- *        list: http://primes.utm.edu/lists/small/100000.txt NOTE: Make sure you
- *        only hard code the prime numbers that are going to be used. Do NOT
- *        copy the whole list!
+ *        This class creates a table of words that contains the word
+ *        and the number of occurrences for each word.
  * 
  *        TODO: Develop appropriate tests for your HashTable.
  */
@@ -47,7 +26,15 @@ public class HashTable_OA extends DataCounter {
 	private int countElem;
 	private DataCount theData;
 	
-
+	/**
+	 * given a comparator and hasher, initializes the fields
+	 * to the parameters, sets the current prime to be used,
+	 * the size of the table to used and creates the empty
+	 * table.
+	 * 
+	 * @param c, the comparator object used to compare strings
+	 * @param h, used for getting the hash codes for strings
+	 */
 	public HashTable_OA(Comparator<String> c, Hasher h) {
 		comp = c;
 		hash = h;
@@ -57,9 +44,18 @@ public class HashTable_OA extends DataCounter {
 		
 	}
 
+	/**
+	 * Adds the given word to the table at the index of the hash
+	 * number of the word, if the word already exists in the table,
+	 * it increments the occurrence count of the word in the table,
+	 * resizes the table when the table starts to get too many more
+	 * elements than the size of the table
+	 * 
+	 * @param data, the word to be added to the table
+	 */
 	@Override
 	public void incCount(String data) {
-		if((double) countElem / primes[currentPrime] >= 2){
+		if((double) countElem / tableSize >= 1.0){
 			SimpleIterator itr = getIterator();
 			currentPrime++;
 			DataCount [] newElem = new DataCount[primes[currentPrime]];
@@ -76,56 +72,120 @@ public class HashTable_OA extends DataCounter {
 			}
 			table = newElem; 
 		}
-		theData = find(data,true);
+		theData = add(data);
 	}
 	
-	private DataCount find (String data, boolean num){
+	/**
+	 * Looks through the current words to find where to place the
+	 * given word into the table, once it finds an empty spot, it
+	 * puts the word into the table.  Returns back the word created.
+	 * 
+	 * @param data, the word to be added
+	 * @return returns the word and its occurrence count
+	 */
+	private DataCount add (String data){
 		int temp = hash.hash(data) % tableSize;
-		while (comp.compare(data,  table[temp].data) != 0 && table[temp] != null){
+		int index = probe(data, temp);
+		if (index != -1) {
+			if(table[index] == null){
+				table[index] = new DataCount(data, 1);
+				countElem++;
+			} else {
+				table[index].count++;
+			}
+		}
+		return table[temp];
+	}
+	
+	/**
+	 * Looks through the table starting at the given index
+	 * to find an empty space or if the given word is already
+	 * in the table, returns the index of the slot found, if
+	 * none found, returns -1
+	 * 
+	 * @param data, the word to be added
+	 * @param temp, the index to start looking at
+	 * @return returns the index for the word to be added into
+	 */
+	private int probe (String data, int temp) {
+		int init = temp;
+		while (table[temp] != null && comp.compare(data,  table[temp].data) != 0){
 			temp++;
 			if(temp == table.length){
 				temp = 0;
 			}
+			if (temp == init) {
+				break;
+			}
 		}
-		if(table[temp] == null){
-			return new DataCount(data,0);
-		}else if(table[temp] == null && num){
-			table[temp] = new DataCount(data, 0);
-			tableSize++;
+		if (temp == init) {
+			return -1;
 		}
-		return table[temp];
+		return temp;
 	}
 
+	/**
+	 * @return the number of unique elements in the table
+	 */
 	@Override
 	public int getSize() {
-		return tableSize;
+		return countElem;
 	}
 
+	/**
+	 * Looks for the word that matches the given string
+	 * and returns the number of times that word occurs
+	 * 
+	 * @param data, the word for the count number
+	 * @return returns the number of times that word appears
+	 */
 	@Override
 	public int getCount(String data) {
-		int index = (hash.hash(data)) % tableSize;
-		return find(data, true).count;
+		int temp = hash.hash(data) % tableSize;
+		int index = probe(data, temp);
+		if (index != -1) {
+			DataCount isFound = table[index];
+			return isFound.count;
+		}
+		return index;
 	}
 
+	/**
+	 * @return returns an instance of the SimpleIterator
+	 */
 	@Override
 	public SimpleIterator getIterator() {
 		return new CountIterator();
 	}
 	
+	/**
+	 * A private class implementation of SimpleIterator
+	 * to iterate over a list of DataCount objects
+	 */
 	private class CountIterator implements SimpleIterator {
-		public LinkedList<DataCount> list;
+		public DataCount[] list =  table;
 		public int index;
+		
+		/**
+		 * @exception throws NoSuchElementException if there isn't
+		 * another item in the list
+		 * @return returns the next item in the list
+		 */
 		public DataCount next(){
 			if (!hasNext()){
 				throw new NoSuchElementException();
 			}
-			DataCount temp = list.get(index);
+			DataCount temp = list[index];
 			index++;
 			return temp;
 		}
 		
+		/**
+		 * @return returns true if there is another item in
+		 * the list, returns false otherwise
+		 */
 		public boolean hasNext(){
-			return !(list.size() ==  index);
+			return !(list.length ==  index);
 		}
 	}
 

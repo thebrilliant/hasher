@@ -18,6 +18,8 @@ public class WordCount {
 		int index = 0;
 		while(next.hasNext() && index < result.length) {
 			result[index] = next.next();
+			System.out.println(result[index].data);
+			index++;
 		}
 		return result;
 	}
@@ -58,6 +60,7 @@ public class WordCount {
 	 * @param comparator for comparing elements.
 	 */
 	private static <E> void insertionSort(E[] array, Comparator<E> comparator) {
+		System.out.println(array.length);
 		for (int i = 1; i < array.length; i++) {
 			E x = array[i];
 			int j;

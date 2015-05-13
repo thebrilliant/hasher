@@ -1,7 +1,10 @@
 package shake_n_bacon;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
+
 import providedCode.*;
 
 /**
@@ -18,7 +21,8 @@ import providedCode.*;
 public class HashTable_SC extends DataCounter {
 	private int[] primes = {11,23,47,97,193,409,757,1423,2843,6217,14029,
 							28031,56369,109913,130873,180001,200003};
-	private LinkedList[] table;
+	private List<LinkedList<DataCount>> table;
+	private List[] table2;
 	private int tableSize;
 	private int currentPrime;
 	private Hasher hash;
@@ -39,7 +43,8 @@ public class HashTable_SC extends DataCounter {
 		hash = h;
 		currentPrime = 0;
 		tableSize = primes[currentPrime];
-		table = new LinkedList[tableSize];
+		table = new ArrayList<LinkedList<DataCount>>(tableSize);
+		table2 = new LinkedList[tableSize];
 	}
 
 	/**
@@ -49,26 +54,27 @@ public class HashTable_SC extends DataCounter {
 	 * resizes the table when the table starts to get too many more
 	 * elements than the size of the table
 	 * 
-	 * @param data, the word to be added to the hash table
+	 * @param data, the word to be added to the table
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void incCount(String data) {
-		if(calcLoadFactor() > 2.0) {
+		if(calcLoadFactor() > 1.0) {
 			resize();
 		}
 		int place = (hash.hash(data)) % tableSize;
-		DataCount newElem = new DataCount(data, 0);
-		if (table[place] == null) {
+		DataCount newElem = new DataCount(data, 1);
+		if (table2[place] == null) {
 			LinkedList<DataCount> newList = new LinkedList<DataCount>();
 			newList.add(newElem);
-			table[place] = newList;
+			table2[place] = newList;
 			countElem++;
 		} else {
 			DataCount word = find(data, place);
 			if (word != null) {
 				word.count++;	
 			} else {
-				table[place].add(newElem);
+				table2[place].add(newElem);
 				countElem++;
 			}
 		}
@@ -84,14 +90,15 @@ public class HashTable_SC extends DataCounter {
 	 * @return returns the DataCount object for the given string
 	 * if it exists, else it returns null
 	 */
+	@SuppressWarnings("unchecked")
 	private DataCount find(String data, int hashNum) {
-		LinkedList<DataCount> hashList = table[hashNum];
-		DataCountIterator itr = new DataCountIterator();
-		itr.list = hashList;
-		while (itr.hasNext()) {
-			DataCount temp = itr.next();
-			if (comp.compare(data, temp.data) == 0) {
-				return temp;
+		List<DataCount> hashList = table2[hashNum];
+		if (hashList != null) {
+			for (int i = 0; i < hashList.size(); i ++) {//null pointer...
+				DataCount temp = hashList.get(i);
+				if (comp.compare(data, temp.data) == 0) {
+					return temp;
+				}
 			}
 		}
 		return null;
@@ -114,24 +121,26 @@ public class HashTable_SC extends DataCounter {
 	 */
 	private void resize() {
 		setTableSize();
-		for (int i = 0; i < table.length; i++) {
-			if (table[i] != null) {
-				DataCountIterator itr = new DataCountIterator();
-				itr.list = table[i];
-				while(itr.hasNext()) {
-					DataCount temp = itr.next();
+		List<DataCount>[] tempTable = new LinkedList[tableSize];
+		
+		for (int i = 0; i < table2.length; i++) {
+			if (table2[i] != null) {
+				for (int j = 0; j < table2[i].size(); j++) {
+					@SuppressWarnings("unchecked")
+					List<DataCount> tempList = table2[i];
+					DataCount temp = tempList.get(j);
 					int place = (hash.hash(temp.data)) % tableSize;
-					if (table[place] == null) {
+					if (tempTable[place] == null) {
 						LinkedList<DataCount> newList = new LinkedList<DataCount>();
 						newList.add(temp);
-						table[place] = newList;
+						tempTable[place] = newList;
 					} else {
-						DataCount word = find(temp.data, place);
-						table[place].add(temp);
+						tempTable[place].add(temp);
 					}
 				}
 			}
 		}
+		table2 = tempTable;
 		
 	}
 	
@@ -142,7 +151,7 @@ public class HashTable_SC extends DataCounter {
 	private void setTableSize() {
 		int temp = currentPrime++;
 		double load = (double) countElem / primes[temp];
-		while (load > 2.0) {
+		while (load > 1.0) {
 			temp++;
 			load = (double) countElem / primes[temp];
 		}
@@ -159,8 +168,8 @@ public class HashTable_SC extends DataCounter {
 	}
 
 	/**
-	 * Looks for the word object that matches the given string
-	 * and returns the number of times that word is counted
+	 * Looks for the word that matches the given string
+	 * and returns the number of times that word occurs
 	 * 
 	 * @param data, the word for the count number
 	 * @return returns the number of times that word appears
@@ -176,7 +185,7 @@ public class HashTable_SC extends DataCounter {
 	}
 
 	/**
-	 * @return returns an instance of the SimpleIterator();
+	 * @return returns an instance of the SimpleIterator
 	 */
 	@Override
 	public SimpleIterator getIterator() {
@@ -186,12 +195,13 @@ public class HashTable_SC extends DataCounter {
 	/**
 	 * A private class implementation of SimpleIterator
 	 * to iterate over a list of DataCount objects
-	 * 
-	 * @author Vivyan Woods
 	 */
 	private class DataCountIterator implements SimpleIterator {
 		int tablePlace;
-		public LinkedList<DataCount> list = table[tablePlace];
+		@SuppressWarnings("rawtypes")
+		public List[] allElem = table2;
+		@SuppressWarnings("unchecked")
+		public List<DataCount> list = table2[tablePlace];
 		public int index;
 
 		/**
@@ -213,17 +223,24 @@ public class HashTable_SC extends DataCounter {
 		 * @return returns true if there is another item in
 		 * the list, returns false otherwise
 		 */
+		@SuppressWarnings("unchecked")
 		@Override
 		public boolean hasNext() {
 			boolean next = true;
-			if (list.size() == index && tablePlace < tableSize) {
+			System.out.println("sorry i'm so slow!");
+			if (allElem[tablePlace] == null || (list.size() == index && tablePlace < tableSize)) {
 				tablePlace++;
-				while (tablePlace < tableSize && table[tablePlace] == null) {
-					tablePlace++;
+				while (tablePlace < tableSize) {
+					if (allElem[tablePlace] == null) {
+						tablePlace++;
+					} else {
+						break;
+					}
 				}
 				if (tablePlace < tableSize) {
-					list = table[tablePlace];
+					list = allElem[tablePlace];
 				} else {
+					System.out.println("there is no more...");
 					next = false;
 				}
 				index = 0;
