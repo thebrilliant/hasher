@@ -5,10 +5,10 @@ import java.util.NoSuchElementException;
 import providedCode.*;
 
 /**
- * @author <name>
- * @UWNetID <uw net id>
- * @studentID <id number>
- * @email <email address>
+ * @author Fardos Mohamed, Vivyan Woods
+ * @UWNetID ffm2, vivyanw
+ * @studentID 1037290, 1327679
+ * @email ffm2@uw.edu, vivyanw@uw.edu
  * 
  *        TODO: Replace this comment with your own as appropriate.
  * 
@@ -49,7 +49,6 @@ public class HashTable_OA extends DataCounter {
 	
 
 	public HashTable_OA(Comparator<String> c, Hasher h) {
-		// TODO: To-be implemented
 		comp = c;
 		hash = h;
 		currentPrime = 0;
@@ -60,7 +59,6 @@ public class HashTable_OA extends DataCounter {
 
 	@Override
 	public void incCount(String data) {
-		// TODO Auto-generated method stub
 		if((double) countElem / primes[currentPrime] >= 2){
 			SimpleIterator itr = getIterator();
 			currentPrime++;
@@ -100,20 +98,17 @@ public class HashTable_OA extends DataCounter {
 
 	@Override
 	public int getSize() {
-		// TODO Auto-generated method stub
 		return tableSize;
 	}
 
 	@Override
 	public int getCount(String data) {
-		// TODO Auto-generated method stub
 		int index = (hash.hash(data)) % tableSize;
 		return find(data, true).count;
 	}
 
 	@Override
 	public SimpleIterator getIterator() {
-		// TODO Auto-generated method stub
 		return new CountIterator();
 	}
 	

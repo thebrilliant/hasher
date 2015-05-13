@@ -168,7 +168,11 @@ public class HashTable_SC extends DataCounter {
 	@Override
 	public int getCount(String data) {
 		int place = (hash.hash(data)) % tableSize;
-		return find(data, place).count;
+		DataCount isFound = find(data, place);
+		if (isFound != null) {
+			return isFound.count;
+		}
+		return -1;
 	}
 
 	/**
@@ -186,7 +190,8 @@ public class HashTable_SC extends DataCounter {
 	 * @author Vivyan Woods
 	 */
 	private class DataCountIterator implements SimpleIterator {
-		public LinkedList<DataCount> list;
+		int tablePlace;
+		public LinkedList<DataCount> list = table[tablePlace];
 		public int index;
 
 		/**
@@ -210,7 +215,20 @@ public class HashTable_SC extends DataCounter {
 		 */
 		@Override
 		public boolean hasNext() {
-			return !(list.size() == index);
+			boolean next = true;
+			if (list.size() == index && tablePlace < tableSize) {
+				tablePlace++;
+				while (tablePlace < tableSize && table[tablePlace] == null) {
+					tablePlace++;
+				}
+				if (tablePlace < tableSize) {
+					list = table[tablePlace];
+				} else {
+					next = false;
+				}
+				index = 0;
+			}
+			return next;
 		}
 		
 	}
