@@ -19,9 +19,6 @@ public class WordCount {
 		while(next.hasNext() && index < result.length) {
 			result[index] = next.next();
 		}
-		
-		//System.err.println("Must implement getCountsArray in WordCount");
-		//System.exit(1);
 		return result;
 	}
 
