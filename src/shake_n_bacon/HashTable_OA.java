@@ -1,7 +1,7 @@
 package shake_n_bacon;
 
 import java.util.LinkedList;
-
+import java.util.NoSuchElementException;
 import providedCode.*;
 
 /**
@@ -39,11 +39,14 @@ import providedCode.*;
 public class HashTable_OA extends DataCounter {
 	private int[] primes = {11,23,47,97,193,409,757,1423,2843,6217,14029,
 							28031,56369,109913,130873,180001,200003};
-	private int[] table;
+	private DataCount[] table;
 	private int tableSize;
 	private int currentPrime;
 	private Hasher hash;
 	private Comparator<String> comp;
+	private int countElem;
+	private DataCount theData;
+	
 
 	public HashTable_OA(Comparator<String> c, Hasher h) {
 		// TODO: To-be implemented
@@ -51,30 +54,84 @@ public class HashTable_OA extends DataCounter {
 		hash = h;
 		currentPrime = 0;
 		tableSize = primes[currentPrime];
-		table = new int[tableSize];
+		table = new DataCount[tableSize];
+		
 	}
 
 	@Override
 	public void incCount(String data) {
 		// TODO Auto-generated method stub
+		if((double) countElem / primes[currentPrime] >= 2){
+			SimpleIterator itr = getIterator();
+			currentPrime++;
+			DataCount [] newElem = new DataCount[primes[currentPrime]];
+			while (itr.hasNext()){
+				DataCount temp = itr.next();
+				int place = hash.hash(temp.data) % tableSize;
+				while(newElem[place] != null){
+					place++;
+					if(place == tableSize){
+						place = 0;
+					}
+				}
+				newElem[place] = temp;
+			}
+			table = newElem; 
+		}
+		theData = find(data,true);
+	}
+	
+	private DataCount find (String data, boolean num){
+		int temp = hash.hash(data) % tableSize;
+		while (comp.compare(data,  table[temp].data) != 0 && table[temp] != null){
+			temp++;
+			if(temp == table.length){
+				temp = 0;
+			}
+		}
+		if(table[temp] == null){
+			return new DataCount(data,0);
+		}else if(table[temp] == null && num){
+			table[temp] = new DataCount(data, 0);
+			tableSize++;
+		}
+		return table[temp];
 	}
 
 	@Override
 	public int getSize() {
 		// TODO Auto-generated method stub
-		return 0;
+		return tableSize;
 	}
 
 	@Override
 	public int getCount(String data) {
 		// TODO Auto-generated method stub
-		return 0;
+		int index = (hash.hash(data)) % tableSize;
+		return find(data, true).count;
 	}
 
 	@Override
 	public SimpleIterator getIterator() {
 		// TODO Auto-generated method stub
-		return null;
+		return new CountIterator();
+	}
+	
+	private class CountIterator implements SimpleIterator {
+		public LinkedList<DataCount> list;
+		public int index;
+		public DataCount next(){
+			if (!hasNext()){
+				throw new NoSuchElementException();
+			}
+			DataCount temp = list.get(index);
+			index++;
+			return temp;
+		}
+		
+		public boolean hasNext(){
+			return !(list.size() ==  index);
+		}
 	}
 
 }
