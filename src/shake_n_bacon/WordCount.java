@@ -10,9 +10,8 @@ import providedCode.*;
  */
 public class WordCount {
 
-	// TODO: Replace this comment with your own as appropriate.
-	// Implement a method that returns an array of DataCount objects
-	// containing each unique word.
+	// Given a table of words, creates a list of each word and its
+	// occurrence.  Returns the list of words
 	private static DataCount[] getCountsArray(DataCounter counter) {
 		DataCount[] result = new DataCount[counter.getSize()];
 		SimpleIterator next = counter.getIterator();
@@ -20,9 +19,6 @@ public class WordCount {
 		while(next.hasNext() && index < result.length) {
 			result[index] = next.next();
 		}
-		
-		//System.err.println("Must implement getCountsArray in WordCount");
-		//System.exit(1);
 		return result;
 	}
 

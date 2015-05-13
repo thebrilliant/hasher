@@ -3,12 +3,14 @@ package shake_n_bacon;
 import providedCode.*;
 
 /**
- * @author Vivyan Woods
- * @UWNetID vivyanw
- * @studentID 1327679
- * @email vivyanw@uw.edu
+ * @author Vivyan Woods, Fardos Mohamed
+ * @UWNetID vivyanw, ffm2
+ * @studentID 1327679, 1037290
+ * @email vivyanw@uw.edu, ffm2@uw.edu
  * 
- *        TODO: REPLACE this comment with your own as appropriate.
+ *        This class compares strings to determine which string
+ *        would come first alphabetically or if they're the same
+ *        string.
  */
 public class StringComparator implements Comparator<String> {
 
