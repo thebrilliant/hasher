@@ -15,12 +15,13 @@ package shake_n_bacon;
 public class timing{
 	
 	private static final int NUM_TIMING= 10;
-	private static final int NUM_WARMUP = 5; //this will exclude the warmup 
-	private static final String TEXT = "Hamlet.txt";
+	private static final int NUM_WARMUP = 5; //this will exclude the Warmup 
+	private static final String TEXT = "hamlet.txt";
 	
 	public static void main (String [] args){
 		String [] name = new String[] {"-o", TEXT};
-		System.out.println("run time: "+avgRunTime(args));
+		double runTime = avgRunTime(name);
+		System.out.println("run time: "+ runTime);
 	}
 	
 	private static double avgRunTime(String[] args){
